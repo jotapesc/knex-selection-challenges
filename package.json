@@ -1,0 +1,32 @@
+{
+  "name": "knex-selection-challenges",
+  "version": "1.0.0",
+  "description": "Bem-vindo(a) ao processo seletivo da Knex Empresa Júnior de Computação! Este repositório contém os desafios técnicos que fazem parte do nosso processo de seleção.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "module",
+    "url": "git+https://github.com/jotapesc/knex-selection-challenges.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/jotapesc/knex-selection-challenges/issues"
+  },
+  "homepage": "https://github.com/jotapesc/knex-selection-challenges#readme",
+  "dependencies": {
+    "csv-parser": "^3.2.0",
+    "dotenv": "^16.5.0",
+    "express": "^5.1.0",
+    "fs": "^0.0.1-security"
+  },
+  "devDependencies": {
+    "@types/dotenv": "^6.1.1",
+    "@types/express": "^5.0.3",
+    "@types/node": "^24.0.3",
+    "typescript": "^5.8.3"
+  }
+}
