@@ -1,0 +1,25 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Deputado {
+  deputadoId String @id @unique
+  nome  String
+  cpf String  @unique
+  partido String 
+  despesas Despesa[]
+}
+
+model Despesa {
+  despesaId String @id @unique
+  dataEmissao DateTime
+  fornecedor String
+  valorLiquido Decimal
+  urlDocumento String
+  deputado Deputado @relation(fields: [despesaId], references: [deputadoId])
+}
