@@ -11,6 +11,11 @@ const upload = multer({ dest: "uploads/" });
 
 app.use(express.json());
 
+app.get("/deputados", (req, res) => {
+  const { uf } = req.query;
+  //pesquisa todos os deputados com a uf indicada
+});
+
 app.post("/upload-ceap", upload.single("ceapFile"), (req, res) => {
   if (!req.file) {
     res.status(400).json({ error: "Nenhum arquivo CSV enviado." });

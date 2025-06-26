@@ -12,6 +12,9 @@ const app = (0, express_1.default)();
 const port = process.env.PORT;
 const upload = (0, multer_1.default)({ dest: "uploads/" });
 app.use(express_1.default.json());
+app.get("/deputados", (req, res) => {
+    console.log(req.query);
+});
 app.post("/upload-ceap", upload.single("ceapFile"), (req, res) => {
     if (!req.file) {
         res.status(400).json({ error: "Nenhum arquivo CSV enviado." });
