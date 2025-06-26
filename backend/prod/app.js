@@ -10,10 +10,11 @@ const csv_parser_1 = __importDefault(require("csv-parser"));
 const multer_1 = __importDefault(require("multer"));
 const app = (0, express_1.default)();
 const port = process.env.PORT;
-const upload = (0, multer_1.default)({ dest: "uploads/" });
+const upload = (0, multer_1.default)({ dest: "backend/uploads/" });
 app.use(express_1.default.json());
 app.get("/deputados", (req, res) => {
-    console.log(req.query);
+    const { uf } = req.query;
+    //pesquisa todos os deputados com a uf indicada
 });
 app.post("/upload-ceap", upload.single("ceapFile"), (req, res) => {
     if (!req.file) {

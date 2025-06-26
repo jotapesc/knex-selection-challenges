@@ -6,7 +6,7 @@ import multer from "multer";
 
 const app = express();
 const port = process.env.PORT;
-const upload = multer({ dest: "uploads/" });
+const upload = multer({ dest: "backend/uploads/" });
 
 
 app.use(express.json());
