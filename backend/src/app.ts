@@ -3,6 +3,7 @@ import "dotenv/config";
 import fs from "fs";
 import csv from "csv-parser";
 import multer from "multer";
+import prisma from "./prisma";
 
 const app = express();
 const port = process.env.PORT;
