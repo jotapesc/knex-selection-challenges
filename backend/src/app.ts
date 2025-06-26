@@ -10,7 +10,6 @@ const app = express();
 const port = process.env.PORT;
 const upload = multer({ dest: "backend/uploads/" });
 
-
 app.use(express.json());
 
 app.get("/deputados", (req, res) => {
@@ -26,28 +25,30 @@ app.post("/upload-ceap", upload.single("ceapFile"), async (req, res) => {
     const filePath = req.file.path;
 
     try {
-      await new Promise<void>((resolve, reject) => {fs.createReadStream(filePath)
-      .pipe(csv({ separator: ';' }))
-      .on("data", (data) => {
-        if (data.sgUF && data.sgUF !== "NA") {
-          results.push(data);
-        }
-      })
-      .on("end", () => {
-        fs.unlinkSync(filePath);
-        resolve();
-      })
-      .on("error", (error) => {
-        reject(error);
-        
-      });})
+      await new Promise<void>((resolve, reject) => {
+        fs.createReadStream(filePath)
+          .pipe(csv({ separator: ";" }))
+          .on("data", (data) => {
+            if (data.sgUF && data.sgUF !== "NA") {
+              results.push(data);
+            }
+          })
+          .on("end", () => {
+            fs.unlinkSync(filePath);
+            resolve();
+          })
+          .on("error", (error) => {
+            reject(error);
+          });
+      });
     } catch (error) {
       if (fs.existsSync(filePath)) {
-      fs.unlinkSync(filePath);
+        fs.unlinkSync(filePath);
+      }
+      res.status(500).json({ error: `Erro ao processar o CSV` });
     }
-    res.status(500).json({ error: `Erro ao processar o CSV` });
-    } 
- } });
+  }
+});
 
 app.listen(port, () => {
   console.log(`Servidor rodando em http://localhost:${port}`);
