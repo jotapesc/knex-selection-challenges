@@ -5,6 +5,7 @@ import csv from "csv-parser";
 import multer from "multer";
 import prisma from "./prisma";
 import { v4 as uuidv4 } from "uuid";
+import stripBomStream from "strip-bom-stream";
 
 const app = express();
 const port = process.env.PORT;
@@ -42,7 +43,12 @@ app.post("/upload-ceap", upload.single("ceapFile"), async (req, res) => {
     try {
       await new Promise<void>((resolve, reject) => {
         fs.createReadStream(filePath)
-          .pipe(csv({ separator: ";" }))
+          .pipe(stripBomStream())
+          .pipe(csv({
+            separator: ";",
+            mapHeaders: ({ header }) => header.trim(),
+            mapValues: ({ value }) => value.trim(),
+          }))
           .on("data", (data) => {
             if (data.sgUF && data.sgUF !== "NA") {
               results.push(data);
