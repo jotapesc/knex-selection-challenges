@@ -8,19 +8,43 @@ require("dotenv/config");
 const fs_1 = __importDefault(require("fs"));
 const csv_parser_1 = __importDefault(require("csv-parser"));
 const multer_1 = __importDefault(require("multer"));
+const prisma_1 = __importDefault(require("./prisma"));
 const uuid_1 = require("uuid");
 const strip_bom_stream_1 = __importDefault(require("strip-bom-stream"));
 const app = (0, express_1.default)();
 const port = process.env.PORT;
 const upload = (0, multer_1.default)({ dest: "backend/uploads/" });
 app.use(express_1.default.json());
-app.get("/deputados", (req, res) => {
-    const { uf } = req.query;
-    //pesquisa todos os deputados com a uf indicada
-});
+async function popularDeputados(deputadosUnicos) {
+    try {
+        const promises = Array.from(deputadosUnicos.values()).map(async (value) => {
+            await prisma_1.default.deputado.create({
+                data: {
+                    deputadoId: value.id,
+                    nome: value.nome,
+                    cpf: value.cpf,
+                    partido: value.partido,
+                    uf: value.uf,
+                },
+            });
+            console.log(`Usuário criado:
+          deputadoId: ${value.id},
+          nome: ${value.nome},
+          cpf: ${value.cpf},
+          partido: ${value.partido},
+          uf: ${value.uf},`);
+        });
+        console.log("Tudo certo");
+        await Promise.all(promises);
+    }
+    catch (error) {
+        throw error;
+    }
+}
 app.post("/upload-ceap", upload.single("ceapFile"), async (req, res) => {
     if (!req.file) {
         res.status(400).json({ error: "Nenhum arquivo CSV enviado." });
+        return;
     }
     else {
         const filePath = req.file.path;
@@ -52,6 +76,12 @@ app.post("/upload-ceap", upload.single("ceapFile"), async (req, res) => {
                     .on("end", () => {
                     fs_1.default.unlinkSync(filePath);
                     res.status(200).json({ message: "Sucesso" });
+                    try {
+                        popularDeputados(deputadosUnicos);
+                    }
+                    catch (error) {
+                        res.status(400).json({ error: `Erro ao criar deputados` });
+                    }
                     resolve();
                 })
                     .on("error", (error) => {

@@ -28,6 +28,26 @@ interface Despesa {
   urlDocumento: string;
 }
 
+async function popularDeputados(deputadosUnicos: Map<string, Deputado>) {
+  try {
+    const promises = Array.from(deputadosUnicos.values()).map(async (value) => { 
+      await prisma.deputado.create({
+          data: {
+            deputadoId: value.id,
+            nome: value.nome,
+            cpf: value.cpf,
+            partido: value.partido,
+            uf: value.uf,
+          },
+        });
+      });
+      console.log("Tudo certo");
+      await Promise.all(promises);
+    } catch (error) {
+    throw error;
+  }
+}
+
 app.get("/deputados", (req, res) => {
   const { uf } = req.query;
   //pesquisa todos os deputados com a uf indicada
@@ -36,6 +56,7 @@ app.get("/deputados", (req, res) => {
 app.post("/upload-ceap", upload.single("ceapFile"), async (req, res) => {
   if (!req.file) {
     res.status(400).json({ error: "Nenhum arquivo CSV enviado." });
+    return;
   } else {
     const filePath = req.file.path;
     const deputadosUnicos = new Map<string, Deputado>();
@@ -66,6 +87,11 @@ app.post("/upload-ceap", upload.single("ceapFile"), async (req, res) => {
           .on("end", () => {
             fs.unlinkSync(filePath);
             res.status(200).json({ message: "Sucesso" });
+            try {
+              popularDeputados(deputadosUnicos);
+            } catch (error) {
+              res.status(400).json({ error: `Erro ao criar deputados` });
+            }
             resolve();
           })
           .on("error", (error) => {
