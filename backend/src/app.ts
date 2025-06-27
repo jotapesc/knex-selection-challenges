@@ -30,20 +30,20 @@ interface Despesa {
 
 async function popularDeputados(deputadosUnicos: Map<string, Deputado>) {
   try {
-    const promises = Array.from(deputadosUnicos.values()).map(async (value) => { 
+    const promises = Array.from(deputadosUnicos.values()).map(async (value) => {
       await prisma.deputado.create({
-          data: {
-            deputadoId: value.id,
-            nome: value.nome,
-            cpf: value.cpf,
-            partido: value.partido,
-            uf: value.uf,
-          },
-        });
+        data: {
+          deputadoId: value.id,
+          nome: value.nome,
+          cpf: value.cpf,
+          partido: value.partido,
+          uf: value.uf,
+        },
       });
-      console.log("Tudo certo");
-      await Promise.all(promises);
-    } catch (error) {
+    });
+    console.log("Tudo certo");
+    await Promise.all(promises);
+  } catch (error) {
     throw error;
   }
 }
@@ -66,22 +66,25 @@ app.post("/upload-ceap", upload.single("ceapFile"), async (req, res) => {
       await new Promise<void>((resolve, reject) => {
         fs.createReadStream(filePath)
           .pipe(stripBomStream())
-          .pipe(csv({
-            separator: ";",
-            mapHeaders: ({ header }) => header.trim(),
-            mapValues: ({ value }) => value.trim(),
-          }))
+          .pipe(
+            csv({
+              separator: ";",
+              mapHeaders: ({ header }) => header.trim(),
+              mapValues: ({ value }) => value.trim(),
+            })
+          )
           .on("data", (data) => {
             if (data.sgUF !== "NA") {
               let uniqueKey = `Nome: ${data.txNomeParlamentar} | CPF: ${data.cpf}`;
               if (!deputadosUnicos.has(uniqueKey)) {
                 deputadosUnicos.set(uniqueKey, {
                   id: uuidv4(),
-                  nome: data.txNomeParlamentar,  
+                  nome: data.txNomeParlamentar,
                   cpf: data.cpf,
                   partido: data.sgPartido,
                   uf: data.sgUF,
-              });}
+                });
+              }
             }
           })
           .on("end", () => {
