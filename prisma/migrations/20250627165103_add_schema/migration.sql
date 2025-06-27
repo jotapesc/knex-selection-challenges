@@ -1,17 +1,10 @@
-/*
-  Warnings:
-
-  - You are about to drop the `User` table. If the table is not empty, all the data it contains will be lost.
-
-*/
--- DropTable
-
 -- CreateTable
 CREATE TABLE "Deputado" (
     "deputadoId" TEXT NOT NULL,
     "nome" TEXT NOT NULL,
     "cpf" TEXT NOT NULL,
     "partido" TEXT NOT NULL,
+    "uf" TEXT NOT NULL,
 
     CONSTRAINT "Deputado_pkey" PRIMARY KEY ("deputadoId")
 );

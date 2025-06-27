@@ -12,6 +12,7 @@ model Deputado {
   nome  String
   cpf String  @unique
   partido String 
+  uf String
   despesas Despesa[]
 }
 
