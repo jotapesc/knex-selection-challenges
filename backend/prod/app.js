@@ -8,6 +8,7 @@ require("dotenv/config");
 const fs_1 = __importDefault(require("fs"));
 const csv_parser_1 = __importDefault(require("csv-parser"));
 const multer_1 = __importDefault(require("multer"));
+const uuid_1 = require("uuid");
 const strip_bom_stream_1 = __importDefault(require("strip-bom-stream"));
 const app = (0, express_1.default)();
 const port = process.env.PORT;
@@ -22,7 +23,6 @@ app.post("/upload-ceap", upload.single("ceapFile"), async (req, res) => {
         res.status(400).json({ error: "Nenhum arquivo CSV enviado." });
     }
     else {
-        const results = [];
         const filePath = req.file.path;
         const deputadosUnicos = new Map();
         const despesasUnicas = new Map();
@@ -37,11 +37,21 @@ app.post("/upload-ceap", upload.single("ceapFile"), async (req, res) => {
                 }))
                     .on("data", (data) => {
                     if (data.sgUF !== "NA") {
-                        results.push(data);
+                        let uniqueKey = `Nome: ${data.txNomeParlamentar} | CPF: ${data.cpf}`;
+                        if (!deputadosUnicos.has(uniqueKey)) {
+                            deputadosUnicos.set(uniqueKey, {
+                                id: (0, uuid_1.v4)(),
+                                nome: data.txNomeParlamentar,
+                                cpf: data.cpf,
+                                partido: data.sgPartido,
+                                uf: data.sgUF,
+                            });
+                        }
                     }
                 })
                     .on("end", () => {
                     fs_1.default.unlinkSync(filePath);
+                    res.status(200).json({ message: "Sucesso" });
                     resolve();
                 })
                     .on("error", (error) => {

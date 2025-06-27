@@ -37,7 +37,6 @@ app.post("/upload-ceap", upload.single("ceapFile"), async (req, res) => {
   if (!req.file) {
     res.status(400).json({ error: "Nenhum arquivo CSV enviado." });
   } else {
-    const results: any[] = [];
     const filePath = req.file.path;
     const deputadosUnicos = new Map<string, Deputado>();
     const despesasUnicas = new Map<string, Despesa>();
@@ -53,11 +52,20 @@ app.post("/upload-ceap", upload.single("ceapFile"), async (req, res) => {
           }))
           .on("data", (data) => {
             if (data.sgUF !== "NA") {
-              results.push(data);
+              let uniqueKey = `Nome: ${data.txNomeParlamentar} | CPF: ${data.cpf}`;
+              if (!deputadosUnicos.has(uniqueKey)) {
+                deputadosUnicos.set(uniqueKey, {
+                  id: uuidv4(),
+                  nome: data.txNomeParlamentar,  
+                  cpf: data.cpf,
+                  partido: data.sgPartido,
+                  uf: data.sgUF,
+              });}
             }
           })
           .on("end", () => {
             fs.unlinkSync(filePath);
+            res.status(200).json({ message: "Sucesso" });
             resolve();
           })
           .on("error", (error) => {
