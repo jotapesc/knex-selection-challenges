@@ -12,6 +12,21 @@ const upload = multer({ dest: "backend/uploads/" });
 
 app.use(express.json());
 
+interface Deputado {
+  id: string;
+  nome: string;
+  cpf: string;
+  partido: string;
+  uf: string;
+}
+
+interface Despesa {
+  dataEmissao: Date;
+  fornecedor: string;
+  valorLiquido: number;
+  urlDocumento: string;
+}
+
 app.get("/deputados", (req, res) => {
   const { uf } = req.query;
   //pesquisa todos os deputados com a uf indicada

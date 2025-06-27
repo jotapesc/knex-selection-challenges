@@ -26,7 +26,7 @@ app.post("/upload-ceap", upload.single("ceapFile"), async (req, res) => {
         try {
             await new Promise((resolve, reject) => {
                 fs_1.default.createReadStream(filePath)
-                    .pipe((0, csv_parser_1.default)({ separator: ';' }))
+                    .pipe((0, csv_parser_1.default)({ separator: ";" }))
                     .on("data", (data) => {
                     if (data.sgUF && data.sgUF !== "NA") {
                         results.push(data);
