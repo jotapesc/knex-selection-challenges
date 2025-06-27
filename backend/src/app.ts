@@ -39,6 +39,8 @@ app.post("/upload-ceap", upload.single("ceapFile"), async (req, res) => {
   } else {
     const results: any[] = [];
     const filePath = req.file.path;
+    const deputadosUnicos = new Map<string, Deputado>();
+    const despesasUnicas = new Map<string, Despesa>();
 
     try {
       await new Promise<void>((resolve, reject) => {
@@ -50,7 +52,7 @@ app.post("/upload-ceap", upload.single("ceapFile"), async (req, res) => {
             mapValues: ({ value }) => value.trim(),
           }))
           .on("data", (data) => {
-            if (data.sgUF && data.sgUF !== "NA") {
+            if (data.sgUF !== "NA") {
               results.push(data);
             }
           })
