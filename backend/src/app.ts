@@ -41,9 +41,57 @@ async function popularDeputados(deputadosUnicos: Map<string, Deputado>) {
                 ]
               }
             });
+
+            if (!exists) {
+              await prisma.deputado.create({
+                data: {
+                  deputadoId: value.id,
+                  nome: value.nome,
+                  cpf: value.cpf,
+                  partido: value.partido,
+                  uf: value.uf,
+                  despesas: {
+                    create: value.despesas.map(
+                      (despesa: {
+                        despesaId: any;
+                        dataEmissao: string | number | Date;
+                        fornecedor: any;
+                        valorLiquido: string;
+                        urlDocumento: any;
+                      }) => ({
+                        despesaId: despesa.despesaId,
+                        dataEmissao: despesa.dataEmissao,
+                        fornecedor: despesa.fornecedor,
+                        valorLiquido: parseFloat(despesa.valorLiquido),
+                        urlDocumento: despesa.urlDocumento,
+                      })
+                    ),
+                  },
+                },
+              });
+            } else {
+              await prisma.despesa.createMany({
+                data: value.despesas.map(
+                  (d: {
+                    despesaId: any;
+                    dataEmissao: any;
+                    fornecedor: any;
+                    valorLiquido: any;
+                    urlDocumento: any;
+                  }) => ({
+                    despesaId: d.despesaId,
+                    dataEmissao: d.dataEmissao,
+                    fornecedor: d.fornecedor,
+                    valorLiquido: d.valorLiquido,
+                    urlDocumento: d.urlDocumento,
+                    deputadoId: exists.deputadoId,
+                  })
+                ),
+              });
+            }
           })
         );
-      });     
+      }, {maxWait: 20000, timeout: 20000});     
     }
   } catch (error) {
     throw error;
@@ -53,6 +101,7 @@ async function popularDeputados(deputadosUnicos: Map<string, Deputado>) {
 app.get("/deputados", (req, res) => {
   const { uf } = req.query;
   //pesquisa todos os deputados com a uf indicada
+  //array uf de vários deputados
 });
 
 app.post("/upload-ceap", upload.single("ceapFile"), async (req, res) => {
@@ -87,22 +136,24 @@ app.post("/upload-ceap", upload.single("ceapFile"), async (req, res) => {
                   despesas: [],
                 });
               }
-              deputadosUnicos.get(uniqueKey)?.despesas.push({
-                despesaId: uuidv4(),
-                dataEmissao: data.datEmissao,
-                fornecedor: data.txtFornecedor,
-                valorLiquido: data.vlrLiquido,
-                urlDocumento: data.urlDocumento,
-              });
+              deputadosUnicos.get(uniqueKey)?.despesas.push(
+                    {
+                      despesaId: uuidv4(),
+                      dataEmissao: data.datEmissao,
+                      fornecedor: data.txtFornecedor,
+                      valorLiquido: data.vlrLiquido,
+                      urlDocumento: data.urlDocumento,
+                    }
+                  )
             }
           })
           .on("end", () => {
             fs.unlinkSync(filePath);
             try {
               popularDeputados(deputadosUnicos);
-              res.status(200).json({ message: "Sucesso" });
+              res.status(200).json({ message: "Banco de dados populado" });
             } catch (error) {
-              res.status(400).json({ error: `Erro ao criar deputados` });
+              res.status(400).json({ error: `Erro ao popular banco de dados` });
             }
             resolve();
           })
