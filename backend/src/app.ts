@@ -19,13 +19,7 @@ interface Deputado {
   cpf: string;
   partido: string;
   uf: string;
-}
-
-interface Despesa {
-  dataEmissao: Date;
-  fornecedor: string;
-  valorLiquido: number;
-  urlDocumento: string;
+  despesas: any;
 }
 
 async function popularDeputados(deputadosUnicos: Map<string, Deputado>) {
@@ -60,7 +54,6 @@ app.post("/upload-ceap", upload.single("ceapFile"), async (req, res) => {
   } else {
     const filePath = req.file.path;
     const deputadosUnicos = new Map<string, Deputado>();
-    const despesasUnicas = new Map<string, Despesa>();
 
     try {
       await new Promise<void>((resolve, reject) => {
@@ -83,15 +76,23 @@ app.post("/upload-ceap", upload.single("ceapFile"), async (req, res) => {
                   cpf: data.cpf,
                   partido: data.sgPartido,
                   uf: data.sgUF,
+                  despesas: [],
                 });
               }
+              deputadosUnicos.get(uniqueKey)?.despesas.push({
+                despesaId: uuidv4(),
+                dataEmissao: data.datEmissao,
+                fornecedor: data.txtFornecedor,
+                valorLiquido: data.vlrLiquido,
+                urlDocumento: data.urlDocumento,
+              });
             }
           })
           .on("end", () => {
             fs.unlinkSync(filePath);
-            res.status(200).json({ message: "Sucesso" });
             try {
               popularDeputados(deputadosUnicos);
+              res.status(200).json({ message: "Sucesso" });
             } catch (error) {
               res.status(400).json({ error: `Erro ao criar deputados` });
             }
