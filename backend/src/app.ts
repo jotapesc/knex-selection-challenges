@@ -24,19 +24,27 @@ interface Deputado {
 
 async function popularDeputados(deputadosUnicos: Map<string, Deputado>) {
   try {
-    const promises = Array.from(deputadosUnicos.values()).map(async (value) => {
-      await prisma.deputado.create({
-        data: {
-          deputadoId: value.id,
-          nome: value.nome,
-          cpf: value.cpf,
-          partido: value.partido,
-          uf: value.uf,
-        },
-      });
-    });
-    console.log("Tudo certo");
-    await Promise.all(promises);
+    const deputadosArray = Array.from(deputadosUnicos.values());
+
+    const batchSize = 100;
+    for (let i = 0; i < deputadosArray.length; i += batchSize) {
+      const batch = deputadosArray.slice(i, i + batchSize);
+
+      await prisma.$transaction(async (prisma) => {
+        await Promise.all(
+          batch.map(async (value) => {
+            const exists = await prisma.deputado.findFirst({
+              where: {
+                OR: [
+                  { deputadoId: value.id },
+                  { cpf: value.cpf }
+                ]
+              }
+            });
+          })
+        );
+      });     
+    }
   } catch (error) {
     throw error;
   }
