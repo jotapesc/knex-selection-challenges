@@ -227,6 +227,17 @@ app.post("/upload-ceap", upload.single("ceapFile"), async (req, res) => {
         }
     }
 });
+app.get("/relatorios/total-despesas", async (req, res) => {
+    try {
+        const soma = await prisma_1.default.despesa.aggregate({
+            _sum: { valorLiquido: true },
+        });
+        res.status(200).json({ message: `Despesa total: ${soma._sum.valorLiquido}` });
+    }
+    catch (error) {
+        res.status(400).json({ error: `Erro ao somar as dívidas` });
+    }
+});
 app.listen(port, () => {
     console.log(`Servidor rodando em http://localhost:${port}`);
 });

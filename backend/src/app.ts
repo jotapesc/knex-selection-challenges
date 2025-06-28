@@ -201,6 +201,17 @@ app.get("/relatorios/deputados/:id/total-despesas", async (req, res) => {
   }
 });
 
+app.get("/relatorios/total-despesas", async (req, res) => {
+  try {
+    const soma = await prisma.despesa.aggregate({
+      _sum: { valorLiquido: true },
+    });
+    res.status(200).json({ message: `Despesa total: ${soma._sum.valorLiquido}` });
+  } catch (error) {
+    res.status(400).json({ error: `Erro ao somar as dívidas` });
+  }
+});
+
 app.post("/upload-ceap", upload.single("ceapFile"), async (req, res) => {
   if (!req.file) {
     res.status(400).json({ error: "Nenhum arquivo CSV enviado." });
