@@ -172,6 +172,35 @@ app.get("/deputados-por-uf", async (req, res) => {
   }
 });
 
+app.get("/relatorios/deputados/:id/total-despesas", async (req, res) => {
+  if (typeof req.params.id === "string") {
+    const depID: string = req.params.id;
+    try {
+      const deputados = await prisma.deputado.findUnique({
+        where: {
+          deputadoId: depID,
+        },
+        include: {
+          despesas: true,
+        },
+      });
+
+      const soma = await prisma.despesa.aggregate({
+        where: {deputadoId: deputados?.deputadoId},
+        _sum: { valorLiquido: true },
+      });
+
+      if (deputados === null) {
+        res.status(400).json({ error: `ID inválido` });
+      } else {
+        res.status(200).json(`Deputado(a): ${deputados.nome} tem uma despesa total de: ${soma._sum.valorLiquido}R$`);
+      }
+    } catch (error) {
+      res.status(400).json({ error: `Erro ao buscar deputados` });
+    }
+  }
+});
+
 app.post("/upload-ceap", upload.single("ceapFile"), async (req, res) => {
   if (!req.file) {
     res.status(400).json({ error: "Nenhum arquivo CSV enviado." });
