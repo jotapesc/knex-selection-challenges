@@ -18,9 +18,10 @@ model Deputado {
 
 model Despesa {
   despesaId String @id @unique
-  dataEmissao DateTime
+  dataEmissao String
   fornecedor String
   valorLiquido Decimal
   urlDocumento String
-  deputado Deputado @relation(fields: [despesaId], references: [deputadoId])
+  deputado Deputado @relation(fields: [deputadoId], references: [deputadoId])
+  deputadoId String
 }
