@@ -15,6 +15,31 @@ const app = (0, express_1.default)();
 const port = process.env.PORT;
 const upload = (0, multer_1.default)({ dest: "backend/uploads/" });
 app.use(express_1.default.json());
+// interface Despesa{
+//   despesaId: string;
+//   dataEmissao: string;
+//   fornecedor: string;
+//   valorLiquido: number;
+//   urlDocumento: string;
+// }
+// async function despesaExists(despesas: Despesa[]) {
+//   try {despesas.forEach(async (obj) => {
+//     if (
+//       await prisma.despesa.findFirst({
+//         where: {
+//           AND: [
+//             { fornecedor: obj.fornecedor },
+//             { valorLiquido: obj.valorLiquido },
+//           ],
+//         },
+//       })
+//     ) {
+//       return console.log(`Fornecedor: ${obj.fornecedor} Valor: ${obj.valorLiquido}`);
+//     }
+//   });
+// } catch(error){
+// }
+// }
 async function popularDeputados(deputadosUnicos) {
     try {
         const deputadosArray = Array.from(deputadosUnicos.values());
@@ -23,7 +48,7 @@ async function popularDeputados(deputadosUnicos) {
             const batch = deputadosArray.slice(i, i + batchSize);
             await prisma_1.default.$transaction(async (prisma) => {
                 await Promise.all(batch.map(async (value) => {
-                    const exists = await prisma.deputado.findFirst({
+                    const deputadoExists = await prisma.deputado.findFirst({
                         where: {
                             OR: [
                                 { deputadoId: value.id },
@@ -31,7 +56,26 @@ async function popularDeputados(deputadosUnicos) {
                             ]
                         }
                     });
-                    if (!exists) {
+                    // const todasDespesas = batch.flatMap((deputado) =>
+                    //   deputado.despesas.map(
+                    //     (despesa: { fornecedor: any; valorLiquido: string }) => ({
+                    //       fornecedor: despesa.fornecedor,
+                    //       valorLiquido: parseFloat(despesa.valorLiquido),
+                    //     })
+                    //   )
+                    // );
+                    // para cada elemento do array despesas, acesse a key fornecedor e compare se já existe no banco de dados
+                    // const despesaExists = await prisma.despesa.findFirst({
+                    //   where: {
+                    //     OR: [
+                    //       { fornecedor: value.despesas },
+                    //       { valorLiquido: value.despesas }
+                    //     ]
+                    //   }
+                    // });
+                    // despesaExists(value.despesas);
+                    // console.log(`${value.nome} ${value.despesas[5].fornecedor}`);
+                    if (!deputadoExists) {
                         await prisma.deputado.create({
                             data: {
                                 deputadoId: value.id,
@@ -59,22 +103,38 @@ async function popularDeputados(deputadosUnicos) {
                                 fornecedor: d.fornecedor,
                                 valorLiquido: d.valorLiquido,
                                 urlDocumento: d.urlDocumento,
-                                deputadoId: exists.deputadoId,
+                                deputadoId: deputadoExists.deputadoId,
                             })),
                         });
                     }
                 }));
-            }, { maxWait: 20000, timeout: 20000 });
+            }, { maxWait: 60000, timeout: 60000 });
         }
     }
     catch (error) {
         throw error;
     }
 }
-app.get("/deputados", (req, res) => {
-    const { uf } = req.query;
-    //pesquisa todos os deputados com a uf indicada
-    //array uf de vários deputados
+app.get("/deputados-por-uf", async (req, res) => {
+    if (typeof req.query.depUF === "string") {
+        const depUF = req.query.depUF.toUpperCase();
+        try {
+            const deputados = await prisma_1.default.deputado.findMany({
+                where: {
+                    uf: depUF,
+                },
+            });
+            if (deputados[0] === undefined) {
+                res.status(400).json({ error: `UF inválida` });
+            }
+            else {
+                res.status(200).json(deputados);
+            }
+        }
+        catch (error) {
+            res.status(400).json({ error: `Erro ao buscar deputados` });
+        }
+    }
 });
 app.post("/upload-ceap", upload.single("ceapFile"), async (req, res) => {
     if (!req.file) {

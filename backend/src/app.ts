@@ -22,6 +22,34 @@ interface Deputado {
   despesas: any;
 }
 
+// interface Despesa{
+//   despesaId: string;
+//   dataEmissao: string;
+//   fornecedor: string;
+//   valorLiquido: number;
+//   urlDocumento: string;
+// }
+
+// async function despesaExists(despesas: Despesa[]) {
+//   try {despesas.forEach(async (obj) => {
+//     if (
+//       await prisma.despesa.findFirst({
+//         where: {
+//           AND: [
+//             { fornecedor: obj.fornecedor },
+//             { valorLiquido: obj.valorLiquido },
+//           ],
+//         },
+//       })
+//     ) {
+//       return console.log(`Fornecedor: ${obj.fornecedor} Valor: ${obj.valorLiquido}`);
+//     }
+//   });
+// } catch(error){
+
+// }
+// }
+
 async function popularDeputados(deputadosUnicos: Map<string, Deputado>) {
   try {
     const deputadosArray = Array.from(deputadosUnicos.values());
@@ -33,7 +61,7 @@ async function popularDeputados(deputadosUnicos: Map<string, Deputado>) {
       await prisma.$transaction(async (prisma) => {
         await Promise.all(
           batch.map(async (value) => {
-            const exists = await prisma.deputado.findFirst({
+            const deputadoExists = await prisma.deputado.findFirst({
               where: {
                 OR: [
                   { deputadoId: value.id },
@@ -42,7 +70,32 @@ async function popularDeputados(deputadosUnicos: Map<string, Deputado>) {
               }
             });
 
-            if (!exists) {
+            // const todasDespesas = batch.flatMap((deputado) =>
+            //   deputado.despesas.map(
+            //     (despesa: { fornecedor: any; valorLiquido: string }) => ({
+            //       fornecedor: despesa.fornecedor,
+            //       valorLiquido: parseFloat(despesa.valorLiquido),
+            //     })
+            //   )
+            // );
+
+            // para cada elemento do array despesas, acesse a key fornecedor e compare se já existe no banco de dados
+            // const despesaExists = await prisma.despesa.findFirst({
+            //   where: {
+            //     OR: [
+            //       { fornecedor: value.despesas },
+            //       { valorLiquido: value.despesas }
+            //     ]
+            //   }
+            // });
+
+            
+            
+            // despesaExists(value.despesas);
+
+            // console.log(`${value.nome} ${value.despesas[5].fornecedor}`);
+
+            if (!deputadoExists) {
               await prisma.deputado.create({
                 data: {
                   deputadoId: value.id,
@@ -54,7 +107,7 @@ async function popularDeputados(deputadosUnicos: Map<string, Deputado>) {
                     create: value.despesas.map(
                       (despesa: {
                         despesaId: any;
-                        dataEmissao: string | number | Date;
+                        dataEmissao: string;
                         fornecedor: any;
                         valorLiquido: string;
                         urlDocumento: any;
@@ -84,24 +137,39 @@ async function popularDeputados(deputadosUnicos: Map<string, Deputado>) {
                     fornecedor: d.fornecedor,
                     valorLiquido: d.valorLiquido,
                     urlDocumento: d.urlDocumento,
-                    deputadoId: exists.deputadoId,
+                    deputadoId: deputadoExists.deputadoId,
                   })
                 ),
               });
             }
           })
         );
-      }, {maxWait: 20000, timeout: 20000});     
+      }, {maxWait: 60000, timeout: 60000});     
     }
   } catch (error) {
     throw error;
   }
 }
 
-app.get("/deputados", (req, res) => {
-  const { uf } = req.query;
-  //pesquisa todos os deputados com a uf indicada
-  //array uf de vários deputados
+app.get("/deputados-por-uf", async (req, res) => {
+  if (typeof req.query.depUF === "string") {
+    const depUF: string = req.query.depUF.toUpperCase();
+    try {
+      const deputados = await prisma.deputado.findMany({
+        where: {
+          uf: depUF,
+        },
+      });
+      if (deputados[0] === undefined) {
+        res.status(400).json({ error: `UF inválida` });
+      } else {
+        res.status(200).json(deputados);
+      }
+      
+    } catch (error) {
+      res.status(400).json({ error: `Erro ao buscar deputados` });
+    }
+  }
 });
 
 app.post("/upload-ceap", upload.single("ceapFile"), async (req, res) => {
