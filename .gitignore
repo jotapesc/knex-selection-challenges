@@ -128,3 +128,4 @@ dist
 
 /backend/uploads
 /backend/src/generated/prisma
+/prisma/migrations
