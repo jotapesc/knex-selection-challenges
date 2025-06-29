@@ -191,7 +191,10 @@ app.get("/deputados/:id/despesas", async (req, res) => {
                     include: {
                         despesas: {
                             where: {
-                                AND: [{ dataEmissao: despData }, { fornecedor: despFornecedor }],
+                                AND: [
+                                    { dataEmissao: despData },
+                                    { fornecedor: despFornecedor },
+                                ],
                             },
                         },
                     },
@@ -247,6 +250,69 @@ app.get("/deputados/:id/despesas", async (req, res) => {
                 }
                 else {
                     res.status(200).json(deputados);
+                }
+            }
+            catch (error) {
+                res.status(400).json({ error: `Erro ao buscar deputados` });
+            }
+        }
+    }
+});
+app.get("/despesas", async (req, res) => {
+    if (typeof req.query.data === "string" &&
+        typeof req.query.fornecedor === "string") {
+        const despData = req.query.data;
+        const despFornecedor = req.query.fornecedor;
+        if (despData !== "" && despFornecedor !== "") {
+            try {
+                const despesas = await prisma_1.default.despesa.findMany({
+                    where: {
+                        AND: [
+                            { dataEmissao: despData },
+                            { fornecedor: despFornecedor },
+                        ],
+                    },
+                });
+                if (despesas[0] === undefined) {
+                    res.status(400).json({ error: `Parâmetros inválidos` });
+                }
+                else {
+                    res.status(200).json(despesas);
+                }
+            }
+            catch (error) {
+                res.status(400).json({ error: `Erro ao buscar deputados` });
+            }
+        }
+        else if (despData !== "" || despFornecedor !== "") {
+            try {
+                const despesas = await prisma_1.default.despesa.findMany({
+                    where: {
+                        OR: [
+                            { dataEmissao: despData },
+                            { fornecedor: despFornecedor },
+                        ],
+                    },
+                });
+                if (despesas[0] === undefined) {
+                    res.status(400).json({ error: `Parâmetros inválidos` });
+                }
+                else {
+                    res.status(200).json(despesas);
+                }
+            }
+            catch (error) {
+                res.status(400).json({ error: `Erro ao buscar deputados` });
+            }
+        }
+        else {
+            try {
+                const despesas = await prisma_1.default.despesa.findMany();
+                if (despesas[0] === undefined) {
+                    res.status(400).json({ error: `ID inválido` });
+                }
+                else {
+                    res.status(200).json(despesas);
                 }
             }
             catch (error) {
