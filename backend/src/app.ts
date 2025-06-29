@@ -212,6 +212,88 @@ app.get("/relatorios/total-despesas", async (req, res) => {
   }
 });
 
+app.get("/deputados/:id/despesas", async (req, res) => {
+  if (
+    typeof req.params.id === "string" &&
+    typeof req.query.data === "string" &&
+    typeof req.query.fornecedor === "string"
+  ) {
+    const depID: string = req.params.id;
+    const despData: string = req.query.data;
+    const despFornecedor: string = req.query.fornecedor;
+
+    if (despData !== "" && despFornecedor !== "") {
+      try {
+        const deputados = await prisma.deputado.findUnique({
+          where: {
+            deputadoId: depID,
+          },
+          include: {
+            despesas: {
+              where: {
+                AND: [
+                  { dataEmissao: despData },
+                  { fornecedor: despFornecedor },
+                ],
+              },
+            },
+          },
+        });
+
+        if (deputados === null) {
+          res.status(400).json({ error: `ID inválido` });
+        } else {
+          res.status(200).json(deputados);
+        }
+      } catch (error) {
+        res.status(400).json({ error: `Erro ao buscar deputados` });
+      }
+    } else if (despData !== "" || despFornecedor !== "") {
+      try {
+        const deputados = await prisma.deputado.findUnique({
+          where: {
+            deputadoId: depID,
+          },
+          include: {
+            despesas: {
+              where: {
+                OR: [{ dataEmissao: despData }, { fornecedor: despFornecedor }],
+              },
+            },
+          },
+        });
+
+        if (deputados === null) {
+          res.status(400).json({ error: `ID inválido` });
+        } else {
+          res.status(200).json(deputados);
+        }
+      } catch (error) {
+        res.status(400).json({ error: `Erro ao buscar deputados` });
+      }
+    } else {
+      try {
+        const deputados = await prisma.deputado.findUnique({
+          where: {
+            deputadoId: depID,
+          },
+          include: {
+            despesas: true,
+          },
+        });
+
+        if (deputados === null) {
+          res.status(400).json({ error: `ID inválido` });
+        } else {
+          res.status(200).json(deputados);
+        }
+      } catch (error) {
+        res.status(400).json({ error: `Erro ao buscar deputados` });
+      }
+    }
+  }
+});
+
 app.post("/upload-ceap", upload.single("ceapFile"), async (req, res) => {
   if (!req.file) {
     res.status(400).json({ error: "Nenhum arquivo CSV enviado." });
