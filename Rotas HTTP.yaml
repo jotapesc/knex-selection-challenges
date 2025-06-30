@@ -1,0 +1,202 @@
+type: collection.insomnia.rest/5.0
+name: My first collection
+meta:
+  id: wrk_20b48e8a38714b7a84c1a86f6071c941
+  created: 1750374212131
+  modified: 1750374212131
+  description: ""
+collection:
+  - url: http://localhost:3000/deputadosporuf
+    name: Listar deputados por UF
+    meta:
+      id: req_5fbd9af77d2c452c84543c91ca599952
+      created: 1750374212191
+      modified: 1751135249596
+      isPrivate: false
+      description: ""
+      sortKey: -1750374212191
+    method: GET
+    body:
+      mimeType: application/json
+      text: ""
+    parameters:
+      - id: pair_548e300f6ced44679cbc551b875d7b46
+        name: depUF
+        value: pb
+        description: ""
+        disabled: false
+        type: text
+        multiline: false
+    headers:
+      - name: Content-Type
+        value: application/json
+      - name: User-Agent
+        value: insomnia/11.2.0
+    settings:
+      renderRequestBody: true
+      encodeUrl: true
+      followRedirects: global
+      cookies:
+        send: true
+        store: true
+      rebuildPath: true
+  - url: http://localhost:3000/upload-ceap
+    name: Upload CEAP
+    meta:
+      id: req_56612ead74cf4dc5aa4f2ead5c4626c0
+      created: 1750375740466
+      modified: 1751160155534
+      isPrivate: false
+      description: ""
+      sortKey: -1750374212091
+    method: POST
+    body:
+      mimeType: multipart/form-data
+      params:
+        - id: pair_440bfae845d147a497ffc8bf9c5034d6
+          name: ceapFile
+          value: ""
+          description: ""
+          disabled: false
+          type: file
+          fileName: C:\Users\minez\Downloads\Ano-2025.csv
+    headers:
+      - name: Content-Type
+        value: multipart/form-data
+      - name: User-Agent
+        value: insomnia/11.2.0
+    settings:
+      renderRequestBody: true
+      encodeUrl: true
+      followRedirects: global
+      cookies:
+        send: true
+        store: true
+      rebuildPath: true
+  - url: http://localhost:3000/relatorios/deputados/:id/total-despesas
+    name: Somar despesas de um deputado por ID
+    meta:
+      id: req_be3bfb7365264749b5b01603058ac8d6
+      created: 1751135241715
+      modified: 1751153209767
+      isPrivate: false
+      description: ""
+      sortKey: -1751135241715
+    method: GET
+    headers:
+      - name: User-Agent
+        value: insomnia/11.2.0
+    settings:
+      renderRequestBody: true
+      encodeUrl: true
+      followRedirects: global
+      cookies:
+        send: true
+        store: true
+      rebuildPath: true
+    pathParameters:
+      - name: id
+        value: 12e5b374-83b1-4220-9b33-1d15995552e5
+  - url: localhost:3000/relatorios/total-despesas
+    name: Somar todas as despesas de todos os deputados
+    meta:
+      id: req_da9b490bfe6842d6a83f7f91b517e1de
+      created: 1751151115665
+      modified: 1751152616340
+      isPrivate: false
+      description: ""
+      sortKey: -1751151115665
+    method: GET
+    headers:
+      - name: User-Agent
+        value: insomnia/11.2.0
+    settings:
+      renderRequestBody: true
+      encodeUrl: true
+      followRedirects: global
+      cookies:
+        send: true
+        store: true
+      rebuildPath: true
+  - url: localhost:3000/deputados/:id/despesas
+    name: Mostrar todas as despesas de um deputado por ID, data e/ou fornecedor
+    meta:
+      id: req_5e3271f0d18d4d77bbb6c01de9a6af44
+      created: 1751154716397
+      modified: 1751160137517
+      isPrivate: false
+      description: ""
+      sortKey: -1751154716397
+    method: GET
+    parameters:
+      - id: pair_2fa3200ae8924827b44e1e9f93aed314
+        name: data
+        value: ""
+        description: ""
+        disabled: false
+      - id: pair_a67f2df556ad4d17a88c77dc0380ba74
+        name: fornecedor
+        value: ""
+        description: ""
+        disabled: false
+    headers:
+      - name: User-Agent
+        value: insomnia/11.2.0
+    settings:
+      renderRequestBody: true
+      encodeUrl: true
+      followRedirects: global
+      cookies:
+        send: true
+        store: true
+      rebuildPath: true
+    pathParameters:
+      - name: id
+        value: 12e5b374-83b1-4220-9b33-1d15995552e5
+  - url: localhost:3000/despesas
+    name: Mostrar todas as despesas por data e/ou fornecedor
+    meta:
+      id: req_a7374fe7d3b440ac9a353e30b574dc1e
+      created: 1751160065737
+      modified: 1751160858890
+      isPrivate: false
+      description: ""
+      sortKey: -1751160065737
+    method: GET
+    parameters:
+      - id: pair_36d0163c32b44c2abf6da58b09d47b90
+        name: data
+        value: ""
+        description: ""
+        disabled: false
+      - id: pair_47f2e54d63844f45ab3fe8adb93f087a
+        name: fornecedor
+        value: ""
+        description: ""
+        disabled: false
+    headers:
+      - name: User-Agent
+        value: insomnia/11.2.0
+    settings:
+      renderRequestBody: true
+      encodeUrl: true
+      followRedirects: global
+      cookies:
+        send: true
+        store: true
+      rebuildPath: true
+cookieJar:
+  name: Default Jar
+  meta:
+    id: jar_a93c73ad084b1e89dd69607cb8af821de7e0c18a
+    created: 1750374212135
+    modified: 1750374212135
+environments:
+  name: Base Environment
+  meta:
+    id: env_a93c73ad084b1e89dd69607cb8af821de7e0c18a
+    created: 1750374212133
+    modified: 1750951223635
+    isPrivate: false
+  data:
+    apiURL: http://localhost:3000
